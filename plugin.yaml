@@ -5,3 +5,5 @@ command: "$HELM_PLUGIN_DIR/example"
 hooks:
   install: "$HELM_PLUGIN_DIR/install-binary.sh"
   update: "$HELM_PLUGIN_DIR/install-binary.sh"
+useTunnel: false
+ignoreFlags: false
