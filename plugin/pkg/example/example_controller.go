@@ -2,8 +2,7 @@ package example
 
 import (
 	"fmt"
-
-	"github.com/leonpatmore/gotemplate/internal/simple"
+	"github.com/leonpatmore/helm-direct-use-plugin/plugin/internal/simple"
 )
 
 func Handle() {
