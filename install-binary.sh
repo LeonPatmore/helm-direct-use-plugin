@@ -4,4 +4,4 @@ version="$(cat plugin.yaml | grep "version" | cut -d ' ' -f 2)"
 
 echo "Installing version $version"
 
-go build cmd/example/example.go
+go build cmd/directuse/main.go
