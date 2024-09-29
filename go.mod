@@ -1,4 +1,4 @@
-module github.com/leonpatmore/helm-direct-use-plugin/plugin
+module github.com/leonpatmore/helm-direct-use-plugin
 
 go 1.23
 
