@@ -10,5 +10,5 @@ func SecondLastAndLast[S ~[]string](slice S) string {
 }
 
 func DetermineFolderFromURL(url string) string {
-	return strings.ReplaceAll(SecondLastAndLast(strings.Split(url, "/")), ".git", "")
+	return filepath.Join("repos", strings.ReplaceAll(SecondLastAndLast(strings.Split(url, "/")), ".git", ""))
 }

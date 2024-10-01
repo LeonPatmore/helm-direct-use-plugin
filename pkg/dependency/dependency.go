@@ -8,10 +8,6 @@ import (
 	"io"
 )
 
-type Updater interface {
-	Update() error
-}
-
 type UpdaterReal struct {
 	Out io.Writer
 }

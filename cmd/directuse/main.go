@@ -6,6 +6,7 @@ import (
 	"github.com/leonpatmore/helm-direct-use-plugin/pkg/dependency"
 	"github.com/leonpatmore/helm-direct-use-plugin/pkg/directuse"
 	"github.com/leonpatmore/helm-direct-use-plugin/pkg/git"
+	"github.com/leonpatmore/helm-direct-use-plugin/pkg/installer"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -14,6 +15,7 @@ import (
 var url string
 var branch string
 var subPath string
+var valueFiles = []string{}
 
 func initCommands() (*cobra.Command, error) {
 	log.SetOutput(os.Stdout)
@@ -26,21 +28,23 @@ func initCommands() (*cobra.Command, error) {
 				Out:             os.Stdout,
 				CheckoutService: checkout.Checkout{Cloner: git.ClonerReal{}},
 				Updater:         dependency.UpdaterReal{Out: os.Stdout},
+				Installer:       installer.HelmInstaller{},
 			}
-			err := directuse.InstallChart(url, subPath, branch, config)
+			err := directuse.InstallChart(url, subPath, branch, valueFiles, config)
 			if err != nil {
 				cmderrors.ExitBadly(err)
 			}
 		},
 	}
 
-	rootCmd.Flags().StringVarP(&url, "url", "u", "", "Url of the chart")
+	rootCmd.Flags().StringVarP(&url, "url", "u", "", "url of the chart")
 	err := rootCmd.MarkFlagRequired("url")
 	if err != nil {
 		return nil, err
 	}
 	rootCmd.Flags().StringVarP(&subPath, "path", "p", "", "sub path of the chart")
 	rootCmd.Flags().StringVarP(&branch, "branch", "b", "master", "branch of the repo")
+	rootCmd.Flags().StringArrayVarP(&valueFiles, "values", "f", []string{}, "value files to apply")
 	return rootCmd, nil
 }
 
