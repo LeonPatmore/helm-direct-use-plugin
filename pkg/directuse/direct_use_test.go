@@ -11,6 +11,8 @@ import (
 var validRepoURL = "http://example.com/user/repo.git"
 var validBranch = "branch"
 var validSubDir = "subdir"
+var validNamespace = "namespace"
+var validReleaseName = "release"
 var validValueFiles = []string{}
 
 type UpdaterMock struct {
@@ -55,7 +57,7 @@ func TestInstallChart_Success(t *testing.T) {
 	updaterMock.On("Update", expectedPath).Return(nil)
 	installerMock.On("Install", expectedPath, "release", "namespace", []string{}).Return(nil)
 
-	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, configuration)
+	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, validReleaseName, validNamespace, configuration)
 
 	assert.NoError(t, err)
 	updaterMock.AssertExpectations(t)
@@ -68,7 +70,7 @@ func TestInstallChart_CheckoutFails(t *testing.T) {
 
 	checkoutServiceMock.On("Checkout", validRepoURL, validBranch).Return("", assert.AnError)
 
-	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, configuration)
+	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, validReleaseName, validNamespace, configuration)
 
 	assert.Error(t, err)
 	updaterMock.AssertExpectations(t)
@@ -82,7 +84,7 @@ func TestInstallChart_UpdateFails(t *testing.T) {
 	checkoutServiceMock.On("Checkout", validRepoURL, validBranch).Return(validSubDir, nil)
 	updaterMock.On("Update", expectedPath).Return(assert.AnError)
 
-	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, configuration)
+	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, validReleaseName, validNamespace, configuration)
 
 	assert.Error(t, err)
 	updaterMock.AssertExpectations(t)
@@ -97,7 +99,7 @@ func TestInstallChart_InstallFails(t *testing.T) {
 	updaterMock.On("Update", expectedPath).Return(nil)
 	installerMock.On("Install", expectedPath, "release", "namespace", []string{}).Return(assert.AnError)
 
-	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, configuration)
+	err := InstallChart(validRepoURL, "/some/dir", validBranch, validValueFiles, validReleaseName, validNamespace, configuration)
 
 	assert.Error(t, err)
 	updaterMock.AssertExpectations(t)

@@ -25,7 +25,7 @@ type Installer interface {
 	Install(path string, releaseName string, namespace string, valueFiles []string) error
 }
 
-func InstallChart(url string, subPath string, branch string, valueFiles []string, c Configuration) error {
+func InstallChart(url string, subPath string, branch string, valueFiles []string, releaseName string, namespace string, c Configuration) error {
 	repoPath, err := c.CheckoutService.Checkout(url, branch)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func InstallChart(url string, subPath string, branch string, valueFiles []string
 	if err != nil {
 		return err
 	}
-	err = c.Installer.Install(chartFullPath, "release", "leon", valueFiles)
+	err = c.Installer.Install(chartFullPath, releaseName, namespace, valueFiles)
 	if err != nil {
 		return err
 	}

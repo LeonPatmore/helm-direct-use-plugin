@@ -7,11 +7,11 @@ import (
 )
 
 func TestDetermineFolderFromURL(t *testing.T) {
-	assert.Equal(t, filepath.Join("SomeUser", "someRepo"), DetermineFolderFromURL("https://github.com/SomeUser/someRepo.git"))
+	assert.Equal(t, filepath.Join("repos", "SomeUser", "someRepo"), DetermineFolderFromURL("https://github.com/SomeUser/someRepo.git"))
 }
 
 func TestDetermineFolderFromURL_NoGitEnding(t *testing.T) {
-	assert.Equal(t, filepath.Join("SomeUser", "someRepo"), DetermineFolderFromURL("https://github.com/SomeUser/someRepo"))
+	assert.Equal(t, filepath.Join("repos", "SomeUser", "someRepo"), DetermineFolderFromURL("https://github.com/SomeUser/someRepo"))
 }
 
 func TestDetermineFolderFromURL_UrlInvalid(t *testing.T) {

@@ -19,11 +19,11 @@ func (m *MockCloner) Clone(path string, repoURL string, branch string) error {
 func TestCheckout_Success(t *testing.T) {
 	mockCloner := new(MockCloner)
 	gitCheckout := &Checkout{mockCloner}
-	mockCloner.On("Clone", filepath.Join("user", "repo"), "http://example.com/user/repo.git", "branch").Return(nil)
+	mockCloner.On("Clone", filepath.Join("repos", "user", "repo"), "http://example.com/user/repo.git", "branch").Return(nil)
 
 	path, err := gitCheckout.Checkout("http://example.com/user/repo.git", "branch")
 
-	assert.Equal(t, filepath.Join("user", "repo"), path)
+	assert.Equal(t, filepath.Join("repos", "user", "repo"), path)
 	assert.NoError(t, err)
 	mockCloner.AssertExpectations(t)
 }
@@ -31,7 +31,7 @@ func TestCheckout_Success(t *testing.T) {
 func TestCheckout_Failure(t *testing.T) {
 	mockCloner := new(MockCloner)
 	gitCheckout := &Checkout{mockCloner}
-	mockCloner.On("Clone", filepath.Join("user", "repo"), "http://example.com/user/repo.git", "branch").Return(assert.AnError)
+	mockCloner.On("Clone", filepath.Join("repos", "user", "repo"), "http://example.com/user/repo.git", "branch").Return(assert.AnError)
 
 	_, err := gitCheckout.Checkout("http://example.com/user/repo.git", "branch")
 

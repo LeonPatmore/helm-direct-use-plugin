@@ -1,11 +1,15 @@
 package installer
 
 import (
+	"errors"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v3/pkg/storage/driver"
 	"log"
 	"os"
 )
@@ -13,21 +17,20 @@ import (
 type HelmInstaller struct{}
 
 func (h HelmInstaller) Install(path string, releaseName string, namespace string, valueFiles []string) error {
-	log.Printf("Installing chart [ %s ] with release name [ %s ] to namespace [ %s ]", path, releaseName, namespace)
-
 	actionConfig := generateActionConfiguration(namespace)
-	client := action.NewInstall(actionConfig)
-	client.Namespace = namespace
-	client.CreateNamespace = true
-	client.ReleaseName = releaseName
-	client.IsUpgrade = true
-	client.TakeOwnership = true
+	histClient := action.NewHistory(actionConfig)
+	histClient.Max = 1
+	versions, err := histClient.Run(releaseName)
+	if err != nil {
+		return err
+	}
 
+	client := action.NewInstall(actionConfig)
 	chartLocation, err := client.LocateChart(path, cli.New())
 	if err != nil {
 		return err
 	}
-	chart, err := loader.Load(chartLocation)
+	chartObject, err := loader.Load(chartLocation)
 	if err != nil {
 		return err
 	}
@@ -39,11 +42,48 @@ func (h HelmInstaller) Install(path string, releaseName string, namespace string
 		return err
 	}
 
-	rel, err := client.Run(chart, mergeValues)
+	if errors.Is(err, driver.ErrReleaseNotFound) || isReleaseUninstalled(versions) {
+		return runInstall(chartObject, mergeValues, releaseName, namespace, actionConfig)
+	}
+	return runUpgrade(chartObject, mergeValues, releaseName, namespace, actionConfig)
+}
+
+/*
+Copied from https://github.com/helm/helm/blob/main/cmd/helm/upgrade.go#L302C1-L304C2
+*/
+func isReleaseUninstalled(versions []*release.Release) bool {
+	return len(versions) > 0 && versions[len(versions)-1].Info.Status == release.StatusUninstalled
+}
+
+func runInstall(chart *chart.Chart, values map[string]interface{}, releaseName string, namespace string, actionConfig *action.Configuration) error {
+	log.Printf("Installing chart with release name [ %s ] to namespace [ %s ]", releaseName, namespace)
+
+	client := action.NewInstall(actionConfig)
+	client.Namespace = namespace
+	client.CreateNamespace = true
+	client.ReleaseName = releaseName
+	client.IsUpgrade = true
+	client.TakeOwnership = true
+
+	rel, err := client.Run(chart, values)
 	if err != nil {
 		return err
 	}
-	log.Printf("Installed Chart [ %s ] in namespace [ %s ]", rel.Name, rel.Namespace)
+	log.Printf("Installed release [ %s ] in namespace [ %s ]", rel.Name, rel.Namespace)
+	return nil
+}
+
+func runUpgrade(chart *chart.Chart, values map[string]interface{}, releaseName string, namespace string, actionConfig *action.Configuration) error {
+	log.Printf("Upgrading chart with release name [ %s ] at namespace [ %s ]", releaseName, namespace)
+
+	client := action.NewUpgrade(actionConfig)
+	client.Namespace = namespace
+
+	rel, err := client.Run(releaseName, chart, values)
+	if err != nil {
+		return err
+	}
+	log.Printf("Upgraded release [ %s ] in namespace [ %s ]", rel.Name, rel.Namespace)
 	return nil
 }
 
