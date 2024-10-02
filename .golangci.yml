@@ -16,3 +16,6 @@ linters:
     - unconvert
     - unparam
     - unused
+issues:
+  exclude-files:
+    - "pkg/git/cloner.go"

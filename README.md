@@ -4,7 +4,7 @@ A helm plugin for installing a chart directly from a git URL. Works with depende
 
 ## Installing
 
-helm plugin install https://github.com/LeonPatmore/helm-direct-use-plugin
+`helm plugin install https://github.com/LeonPatmore/helm-direct-use-plugin`
 
 ## Usage
 

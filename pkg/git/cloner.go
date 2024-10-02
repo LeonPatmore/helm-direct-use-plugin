@@ -1,7 +1,5 @@
 package git
 
-//nolint:typecheck
-
 import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
