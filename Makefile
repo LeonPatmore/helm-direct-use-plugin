@@ -8,7 +8,7 @@ build:
 	go build cmd/directuse/main.go
 
 lint:
-	golangci-lint run --timeout=3m
+	golangci-lint run --timeout=3m --verbose
 
 format:
 	gofmt -s -w .

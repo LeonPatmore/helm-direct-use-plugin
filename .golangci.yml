@@ -12,7 +12,6 @@ linters:
     - misspell
     - nakedret
     - revive
-    - typecheck
     - unconvert
     - unparam
     - unused
