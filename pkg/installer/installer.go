@@ -12,18 +12,21 @@ import (
 	"helm.sh/helm/v3/pkg/storage/driver"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type HelmInstaller struct{}
 
+func Map(slice []string, fn func(string) string) []string {
+	mapped := make([]string, len(slice))
+	for i, v := range slice {
+		mapped[i] = fn(v)
+	}
+	return mapped
+}
+
 func (h HelmInstaller) Install(path string, releaseName string, namespace string, valueFiles []string) error {
 	actionConfig := generateActionConfiguration(namespace)
-	histClient := action.NewHistory(actionConfig)
-	histClient.Max = 1
-	versions, err := histClient.Run(releaseName)
-	if err != nil {
-		return err
-	}
 
 	client := action.NewInstall(actionConfig)
 	chartLocation, err := client.LocateChart(path, cli.New())
@@ -35,13 +38,21 @@ func (h HelmInstaller) Install(path string, releaseName string, namespace string
 		return err
 	}
 
-	opts := values.Options{ValueFiles: valueFiles}
+	log.Printf("Chart location is [ %s ]", chartLocation)
+	valueFilesCorrectPath := Map(valueFiles, func(s string) string {
+		return filepath.Join(chartLocation, s)
+	})
+
+	opts := values.Options{ValueFiles: valueFilesCorrectPath}
 	valueGetters := getter.All(cli.New())
 	mergeValues, err := opts.MergeValues(valueGetters)
 	if err != nil {
 		return err
 	}
 
+	histClient := action.NewHistory(actionConfig)
+	histClient.Max = 1
+	versions, err := histClient.Run(releaseName)
 	if errors.Is(err, driver.ErrReleaseNotFound) || isReleaseUninstalled(versions) {
 		return runInstall(chartObject, mergeValues, releaseName, namespace, actionConfig)
 	}
