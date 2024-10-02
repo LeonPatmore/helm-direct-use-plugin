@@ -12,9 +12,7 @@ linters:
     - misspell
     - nakedret
     - revive
+    - typecheck
     - unconvert
     - unparam
     - unused
-issues:
-  exclude-files:
-    - "pkg/git/cloner.go"
